@@ -32,10 +32,10 @@ CREATE OR REPLACE VIEW pghero_index_usage AS
     pg_stat_user_tables
   ORDER BY
     n_live_tup DESC,
-    relname ASC
+    relname ASC;
 
 CREATE OR REPLACE VIEW pghero_missing_indexes AS
-  SELECT * FROM pghero_index_usage WHERE percent_of_times_index_used < 95 AND rows_in_table >= 10000;
+  SELECT * FROM pghero_index_usage WHERE percent_of_times_index_used::integer < 95 AND rows_in_table >= 10000;
 
 CREATE OR REPLACE VIEW pghero_unused_indexes AS
   SELECT
