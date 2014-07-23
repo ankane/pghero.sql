@@ -2,8 +2,6 @@
 
 Database insights made easy
 
-[View the demo](https://pghero.herokuapp.com/)
-
 ![Screenshot](https://pghero.herokuapp.com/assets/console-75e99c4a6e049943da6eba66b3d758e7.png)
 
 Supports PostgreSQL 9.2+
