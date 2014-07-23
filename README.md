@@ -1,12 +1,16 @@
 # PgHero.sql
 
-:tada: Database insights made easy
+Database insights made easy
+
+[View the demo](https://pghero.herokuapp.com/)
+
+![Screenshot](https://pghero.herokuapp.com/assets/console-75e99c4a6e049943da6eba66b3d758e7.png)
 
 Supports PostgreSQL 9.2+
 
 For Ruby, check out the [pghero gem](https://github.com/ankane/pghero)
 
-:clap: Initial queries and inspiration by [Heroku](https://blog.heroku.com/archives/2013/5/10/more_insight_into_your_database_with_pgextras)
+Initial queries by [Heroku](https://blog.heroku.com/archives/2013/5/10/more_insight_into_your_database_with_pgextras) :clap:
 
 ## Features
 
