@@ -1,7 +1,7 @@
-DROP VIEW IF EXISTS pghero_running_queries;
 DROP VIEW IF EXISTS pghero_long_running_queries;
-DROP VIEW IF EXISTS pghero_index_usage;
+DROP VIEW IF EXISTS pghero_running_queries;
 DROP VIEW IF EXISTS pghero_missing_indexes;
+DROP VIEW IF EXISTS pghero_index_usage;
 DROP VIEW IF EXISTS pghero_unused_indexes;
 DROP VIEW IF EXISTS pghero_table_sizes;
 DROP VIEW IF EXISTS pghero_index_sizes;
