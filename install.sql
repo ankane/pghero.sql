@@ -4,6 +4,7 @@ CREATE OR REPLACE VIEW pghero_running_queries AS
   SELECT
     pid,
     state,
+    usename AS user,
     application_name AS source,
     age(now(), xact_start) AS duration,
     waiting,
