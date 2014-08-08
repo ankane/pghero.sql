@@ -39,7 +39,7 @@ CREATE OR REPLACE VIEW pghero_index_usage AS
 
 DROP VIEW pghero_missing_indexes;
 CREATE OR REPLACE VIEW pghero_missing_indexes AS
-  SELECT * FROM pghero_index_usage WHERE percent_of_times_index_used::integer < 95 AND rows_in_table >= 10000;
+  SELECT * FROM pghero_index_usage WHERE percent_of_times_index_used <> 'Insufficient data' AND percent_of_times_index_used::integer < 95 AND rows_in_table >= 10000;
 
 DROP VIEW pghero_unused_indexes;
 CREATE OR REPLACE VIEW pghero_unused_indexes AS
