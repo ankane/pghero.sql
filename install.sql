@@ -1,5 +1,5 @@
 -- views
-DROP VIEW pghero_running_queries;
+DROP VIEW pghero_running_queries CASCADE;
 CREATE OR REPLACE VIEW pghero_running_queries AS
   SELECT
     pid,
@@ -22,7 +22,7 @@ DROP VIEW pghero_long_running_queries;
 CREATE OR REPLACE VIEW pghero_long_running_queries AS
   SELECT * FROM pghero_running_queries WHERE duration > interval '5 minutes';
 
-DROP VIEW pghero_index_usage;
+DROP VIEW pghero_index_usage CASCADE;
 CREATE OR REPLACE VIEW pghero_index_usage AS
   SELECT
     relname AS table,
