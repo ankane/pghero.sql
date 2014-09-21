@@ -1,11 +1,12 @@
 BEGIN;
 
 -- views
-
+DROP VIEW pghero_running_queries CASCADE;
 CREATE OR REPLACE VIEW pghero_running_queries AS
   SELECT
     pid,
     state,
+    usename AS user,
     application_name AS source,
     age(now(), xact_start) AS duration,
     waiting,
@@ -19,9 +20,11 @@ CREATE OR REPLACE VIEW pghero_running_queries AS
   ORDER BY
     query_start DESC;
 
+DROP VIEW pghero_long_running_queries;
 CREATE OR REPLACE VIEW pghero_long_running_queries AS
   SELECT * FROM pghero_running_queries WHERE duration > interval '5 minutes';
 
+DROP VIEW pghero_index_usage CASCADE;
 CREATE OR REPLACE VIEW pghero_index_usage AS
   SELECT
     relname AS table,
@@ -36,9 +39,11 @@ CREATE OR REPLACE VIEW pghero_index_usage AS
     n_live_tup DESC,
     relname ASC;
 
+DROP VIEW pghero_missing_indexes;
 CREATE OR REPLACE VIEW pghero_missing_indexes AS
   SELECT * FROM pghero_index_usage WHERE percent_of_times_index_used <> 'Insufficient data' AND percent_of_times_index_used::integer < 95 AND rows_in_table >= 10000;
 
+DROP VIEW pghero_unused_indexes;
 CREATE OR REPLACE VIEW pghero_unused_indexes AS
   SELECT
     relname AS table,
@@ -57,6 +62,7 @@ CREATE OR REPLACE VIEW pghero_unused_indexes AS
     pg_relation_size(i.indexrelid) DESC,
     relname ASC;
 
+DROP VIEW pghero_relation_sizes;
 CREATE OR REPLACE VIEW pghero_relation_sizes AS
   SELECT
     c.relname AS name,
