@@ -1,3 +1,4 @@
+BEGIN;
 DROP VIEW IF EXISTS pghero_long_running_queries;
 DROP VIEW IF EXISTS pghero_running_queries;
 DROP VIEW IF EXISTS pghero_missing_indexes;
@@ -8,3 +9,4 @@ DROP FUNCTION IF EXISTS pghero_index_hit_rate();
 DROP FUNCTION IF EXISTS pghero_table_hit_rate();
 DROP FUNCTION IF EXISTS pghero_kill(integer);
 DROP FUNCTION IF EXISTS pghero_kill_all();
+COMMIT;

@@ -1,3 +1,5 @@
+BEGIN;
+
 -- views
 
 CREATE OR REPLACE VIEW pghero_running_queries AS
@@ -113,3 +115,5 @@ $$
     AND query <> '<insufficient privilege>';
 $$
   LANGUAGE SQL;
+
+COMMIT;
