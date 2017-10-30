@@ -2,7 +2,7 @@
 
 Postgres insights made easy
 
-![Screenshot](https://pghero.herokuapp.com/assets/console-75e99c4a6e049943da6eba66b3d758e7.png)
+![Screenshot](https://pghero.dokkuapp.com/assets/console-0be938fcc5148ce688fd945f6d1e16f0.png)
 
 Supports PostgreSQL 9.2+
 
