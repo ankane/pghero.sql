@@ -123,6 +123,21 @@ Both should be above 90% resp. 99%.
 SELECT * FROM pghero_client_statistics;
 ```
 
+##### Statement statistics
+
+These views need the `pg_stat_statements` loaded as a shared library
+and are located in the `install_pg_statemens.sql` file.
+
+Summarize statistics for select and update statements
+
+```sql
+SELECT * FROM pghero_slow_selects
+```
+
+```sql
+SELECT * FROM pghero_slow_updates
+```
+
 ## Install
 
 Run this command from your shell:

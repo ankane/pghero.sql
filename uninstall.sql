@@ -12,6 +12,8 @@ DROP VIEW IF EXISTS pghero_cache_hitrate;
 DROP VIEW IF EXISTS pghero_cache_indexrate;
 DROP VIEW IF EXISTS pghero_relation_hot;
 DROP VIEW IF EXISTS pghero_client_statistics;
+DROP VIEW IF EXISTS pghero_slow_selects;
+DROP VIEW IF EXISTS pghero_slow_updates;
 DROP FUNCTION IF EXISTS pghero_index_hit_rate();
 DROP FUNCTION IF EXISTS pghero_table_hit_rate();
 DROP FUNCTION IF EXISTS pghero_kill(integer);
