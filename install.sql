@@ -117,4 +117,118 @@ $$
 $$
   LANGUAGE SQL;
 
+-- table bloat views
+
+CREATE OR REPLACE VIEW pghero_relation_bloat AS (
+SELECT current_database(), schemaname, tblname, 
+  pg_size_pretty((bs*tblpages)::bigint) AS real_size,
+  pg_size_pretty(abs(((tblpages-est_tblpages)*bs)::bigint)) AS extra_size,
+  CASE WHEN abs(tblpages - est_tblpages) > 0
+    THEN 100 * abs(tblpages - est_tblpages)/tblpages::float
+    ELSE 0
+  END AS extra_ratio, fillfactor, 
+  abs(((tblpages-est_tblpages_ff)*bs)::bigint) AS bloat_size_bytes,
+  CASE WHEN abs(tblpages - est_tblpages_ff) > 0
+    THEN 100 * abs(tblpages - est_tblpages_ff)/tblpages::float
+    ELSE 0
+  END AS bloat_ratio, is_na
+FROM (
+  SELECT ceil( reltuples / ( (bs-page_hdr)/tpl_size ) ) + ceil( toasttuples / 4 ) AS est_tblpages,
+    ceil( reltuples / ( (bs-page_hdr)*fillfactor/(tpl_size*100) ) ) + ceil( toasttuples / 4 ) AS est_tblpages_ff,
+    tblpages, fillfactor, bs, tblid, schemaname, tblname, heappages, toastpages, is_na
+  FROM (
+    SELECT
+      ( 4 + tpl_hdr_size + tpl_data_size + (2*ma)
+        - CASE WHEN tpl_hdr_size%ma = 0 THEN ma ELSE tpl_hdr_size%ma END
+        - CASE WHEN ceil(tpl_data_size)::int%ma = 0 THEN ma ELSE ceil(tpl_data_size)::int%ma END
+      ) AS tpl_size, bs - page_hdr AS size_per_block, (heappages + toastpages) AS tblpages, heappages,
+      toastpages, reltuples, toasttuples, bs, page_hdr, tblid, schemaname, tblname, fillfactor, is_na
+    FROM (
+      SELECT
+        tbl.oid AS tblid, ns.nspname AS schemaname, tbl.relname AS tblname, tbl.reltuples,
+        tbl.relpages AS heappages, coalesce(toast.relpages, 0) AS toastpages,
+        coalesce(toast.reltuples, 0) AS toasttuples,
+        coalesce(substring(
+          array_to_string(tbl.reloptions, ' ')
+          FROM '%fillfactor=#"__#"%' FOR '#')::smallint, 100) AS fillfactor,
+        current_setting('block_size')::numeric AS bs,
+        CASE WHEN version()~'mingw32' OR version()~'64-bit|x86_64|ppc64|ia64|amd64' THEN 8 ELSE 4 END AS ma,
+        24 AS page_hdr,
+        23 + CASE WHEN MAX(coalesce(null_frac,0)) > 0 THEN ( 7 + count(*) ) / 8 ELSE 0::int END
+          + CASE WHEN tbl.relhasoids THEN 4 ELSE 0 END AS tpl_hdr_size,
+        sum( (1-coalesce(s.null_frac, 0)) * coalesce(s.avg_width, 1024) ) AS tpl_data_size,
+        bool_or(att.atttypid = 'pg_catalog.name'::regtype) AS is_na
+      FROM pg_attribute AS att
+        JOIN pg_class AS tbl ON att.attrelid = tbl.oid
+        JOIN pg_namespace AS ns ON ns.oid = tbl.relnamespace
+        JOIN pg_stats AS s ON s.schemaname=ns.nspname
+          AND s.tablename = tbl.relname AND s.inherited=false AND s.attname=att.attname
+        LEFT JOIN pg_class AS toast ON tbl.reltoastrelid = toast.oid
+      WHERE att.attnum > 0 AND NOT att.attisdropped
+        AND tbl.relkind = 'r'
+      GROUP BY 1,2,3,4,5,6,7,8,9,10, tbl.relhasoids
+      ORDER BY 2,3
+    ) AS s
+  ) AS s2
+) AS s3
+WHERE schemaname not in ('information_schema','pg_catalog')
+ORDER BY bloat_size_bytes desc
+);
+
+CREATE OR REPLACE VIEW pghero_relation_needs_vacuum AS (
+    select * from pghero_relation_bloat where bloat_ratio > 10 and bloat_size_bytes > (1024 * 1024 * 100)
+);
+
+CREATE OR REPLACE VIEW pghero_relation_last_vacuum AS (
+    SELECT relname, last_vacuum, last_autovacuum, last_analyze, last_autoanalyze FROM pg_stat_user_tables
+);
+
+-- internal cache hitrate
+
+CREATE OR REPLACE VIEW pghero_cache_hitrate AS (
+SELECT 
+  sum(heap_blks_read) as heap_read,
+  sum(heap_blks_hit)  as heap_hit,
+  sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) as cache_hitrate
+FROM 
+  pg_statio_user_tables
+);
+
+CREATE OR REPLACE VIEW pghero_cache_indexrate AS (
+SELECT 
+  sum(idx_blks_read) as idx_read,
+  sum(idx_blks_hit)  as idx_hit_in_cache,
+  (sum(idx_blks_hit) - sum(idx_blks_read)) / sum(idx_blks_hit) as idx_in_cache_hitrate
+FROM 
+  pg_statio_user_indexes
+);
+
+CREATE OR REPLACE VIEW pghero_relation_hot AS (SELECT
+  relname as table,
+  (n_tup_upd + n_tup_ins + n_tup_del) as total_changes,
+  n_tup_ins as total_inserts,
+  n_tup_del as total_deletes,
+  trunc( ((n_tup_ins::float + n_tup_del::float) / (n_tup_upd::float + n_tup_ins::float + n_tup_del::float) )::numeric,2) as insert_delete_ratio,
+  n_tup_upd as total_updates,
+  trunc( ((n_tup_upd::float) / (n_tup_upd::float + n_tup_ins::float + n_tup_del::float))::numeric,2 ) as update_ratio,
+  n_tup_hot_upd as hot_updates,
+  trunc( (n_tup_hot_upd::float / (n_tup_upd::float + 1) )::numeric,2) as hot_update_ratio
+FROM
+  pg_stat_user_tables
+WHERE
+  (n_tup_upd + n_tup_ins + n_tup_del) > 0
+ORDER BY 2 DESC
+);
+
+CREATE OR REPLACE VIEW pghero_client_statistics AS (
+   select 
+     count(*) as total,
+     count(*) filter (where state like 'idle%') as idle,
+     count(*) filter (where state='active') as active,
+     count(*) filter (where query ilike 'REFRESH MATERIALIZED VIEW%') as refresh_materialized_view,
+     count(*) filter (where query ilike 'autovacuum%') as autovacuum
+   from pg_stat_activity
+   where pid <> pg_backend_pid()
+);
+
 COMMIT;

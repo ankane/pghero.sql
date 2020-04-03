@@ -66,6 +66,30 @@ Largest tables and indexes
 SELECT * FROM pghero_relation_sizes;
 ```
 
+Check for your HOT update ratio
+
+```sql
+SELECT * FROM pghero_relation_hot;
+```
+
+Table bloat
+
+```sql
+SELECT * FROM pghero_relation_bloat;
+```
+
+Last table vacuum
+
+```sql
+SELECT * FROM pghero_relation_last_vacuum
+```
+
+Tables that need a vacuum (bloat ration >10% with a significant size)
+
+```sql
+SELECT * FROM pghero_relation_needs_vacuum
+```
+
 #### Cache Hit Ratio
 
 ```sql
@@ -79,6 +103,25 @@ SELECT pghero_table_hit_rate();
 ```
 
 Both should be above 99%.
+
+Check internal Postgres heap cache hit rate on
+table reads and index reads
+
+```sql
+SELECT * FROM pghero_cache_hitrate:
+```
+
+```sql
+SELECT * FROM pghero_cache_indexrate
+```
+
+Both should be above 90% resp. 99%.
+
+##### Connected client statistics
+
+```sql
+SELECT * FROM pghero_client_statistics;
+```
 
 ## Install
 
