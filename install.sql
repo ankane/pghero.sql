@@ -8,7 +8,6 @@ CREATE OR REPLACE VIEW pghero_running_queries AS
     state,
     application_name AS source,
     age(now(), xact_start) AS duration,
-    waiting,
     query
   FROM
     pg_stat_activity

@@ -1,12 +1,10 @@
 # PgHero.sql
 
+**Note:** This has been replaced with [PgHero](https://github.com/ankane/pghero).
+
 Postgres insights made easy
 
-![Screenshot](https://pghero.dokkuapp.com/assets/console-0be938fcc5148ce688fd945f6d1e16f0.png)
-
-Supports PostgreSQL 9.2+
-
-For Ruby, check out the [pghero gem](https://github.com/ankane/pghero)
+Supports PostgreSQL 9.4+
 
 A big thanks to [Craig Kerstiens](http://www.craigkerstiens.com/2013/01/10/more-on-postgres-performance/) and [Heroku](https://blog.heroku.com/archives/2013/5/10/more_insight_into_your_database_with_pgextras) for the initial queries :clap:
 
